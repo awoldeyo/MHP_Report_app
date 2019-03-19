@@ -23,7 +23,7 @@ class Connection(object):
 
     def generate_opl(self):
         issues = self.jira.search_issues(
-                jql_str='project = DSGVOOPL AND labels = OPL',
+                jql_str='project = DSGVOOPL AND labels = OPL AND status != Done',
                 maxResults=False)
         table = []
         for issue in issues:
@@ -102,7 +102,8 @@ class Connection(object):
                     key = linkedissue.outwardIssue.key
                 except:
                     key = linkedissue.inwardIssue.key
-                status = status_mapping.get(self.jira.issue(key).fields.status.name)
+                status = status_mapping.get(self.jira.issue(key).fields.status.name,
+                                            self.jira.issue(key).fields.status.name)
                 statement = f"{key} (Status: {status})"
                 linked.append(statement)
             linked = ", ".join(linked)
