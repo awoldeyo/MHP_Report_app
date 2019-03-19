@@ -81,7 +81,7 @@ class Connection(object):
         return df
     def generate_risk(self):
         issues = self.jira.search_issues(
-                jql_str='project = DSGVOOPL AND labels = Risikoliste',
+                jql_str='project = DSGVOOPL AND labels = Risikoliste AND status != Done',
                 maxResults=False)
         table = []
         for issue in issues:
@@ -102,8 +102,7 @@ class Connection(object):
                     key = linkedissue.outwardIssue.key
                 except:
                     key = linkedissue.inwardIssue.key
-                status = status_mapping.get(self.jira.issue(key).fields.status.name,
-                                            self.jira.issue(key).fields.status.name)
+                status = status_mapping.get(self.jira.issue(key).fields.status.name)
                 statement = f"{key} (Status: {status})"
                 linked.append(statement)
             linked = ", ".join(linked)
