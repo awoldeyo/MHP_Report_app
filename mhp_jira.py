@@ -39,8 +39,12 @@ class Connection(object):
             except IndexError as i:
                 print(f"No comment available for {issue.key}")
                 row['Bearbeitungsstand'] = None
-
-            row['Erstelldatum'] = to_datetime(issue.fields.created)
+                
+            if issue.fields.customfield_11007:
+                row['Erstelldatum'] = to_datetime(issue.fields.customfield_11007)
+            else:
+                row['Erstelldatum'] = to_datetime(issue.fields.created)
+            
             try:
                 row['Zieldatum'] = to_datetime(issue.fields.duedate)
             except AttributeError:
@@ -117,8 +121,11 @@ class Connection(object):
                 row['Risikoart'] = issue.fields.customfield_11006.value
             except:
                 row['Risikoart'] = None
-
-            row['Erstelldatum'] = to_datetime(issue.fields.created)
+            
+            if issue.fields.customfield_11007:
+                row['Erstelldatum'] = to_datetime(issue.fields.customfield_11007)
+            else:
+                row['Erstelldatum'] = to_datetime(issue.fields.created)
 
             row['Risikoeinstufung'] = issue.fields.priority.name
 
@@ -176,18 +183,23 @@ class Connection(object):
             ws.row_dimensions[row+7].height = i*2.25
 
         # Format date columns
-        date_cols = ws['E7:101']
-        date_cols += ws['F7:101']
+        date_cols = ws['E7:401']
+        date_cols += ws['F7:401']
         for cell in date_cols:
             cell[0].number_format = 'DD.MM.YY'
 
         # Formatting
         ws = writer.sheets['Projektrisiken']
 
-            # Row height adjustment
+        # Row height adjustment
         max_rows = self.risk.apply(lambda x: max([len(str(row).split()) for row in x if row is not None]), axis=1).tolist()
         for row,i in enumerate(max_rows):
             ws.row_dimensions[row+7].height = i*2.25
+            
+        # Format date columns
+        date_cols = ws['G7:401']
+        for cell in date_cols:
+            cell[0].number_format = 'DD.MM.YY'
 
         self.risk.to_excel(writer, 'Projektrisiken', startrow=6, index=False, header=False)
 
